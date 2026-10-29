@@ -1,6 +1,7 @@
 import {useState,type CSSProperties} from 'react';
 import {BookOpen} from 'lucide-react';
 import type {Book} from '../data';
+type CoverBook=Pick<Book,'title'|'author'|'cover'>;
 
 // Available covers are included in the build, so phones load them from the site itself.
 const bundledCovers=import.meta.glob<string>('../assets/covers/*.jpg',{
@@ -19,11 +20,11 @@ function sourcesFor(cover:string):string[]{
     return [cover];
   }catch{return []}
 }
-export function Cover({book,large=false}:{book:Book;large?:boolean}){
+export function Cover({book,large=false}:{book:CoverBook;large?:boolean}){
   // A changed URL remounts the image state immediately, including during book editing.
   return <CoverImage key={book.cover} book={book} large={large}/>;
 }
-function CoverImage({book,large}:{book:Book;large:boolean}){
+function CoverImage({book,large}:{book:CoverBook;large:boolean}){
   const sources=sourcesFor(book.cover);
   const [index,setIndex]=useState(0);
   const [ready,setReady]=useState(false);
