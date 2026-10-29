@@ -1,0 +1,55 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+test('Полный дневник: книги, цитаты, итоги, сохранение и резервные копии',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();
+ await page.locator('.page-heading').getByRole('button',{name:'Добавить книгу',exact:true}).click();
+ let dialog=page.getByRole('dialog');
+ await dialog.getByLabel('Название книги').fill('Тестовая история');await dialog.getByLabel('Автор', {exact:false}).fill('Читатель');
+ await dialog.getByLabel('Количество страниц').fill('200');await dialog.getByLabel('Статус чтения').selectOption('reading');
+ await dialog.getByLabel('Дата начала').fill('2026-01-01');await dialog.getByLabel('Прочитанная страница').fill('40');
+ await dialog.getByLabel('Личные впечатления').fill('Впечатления, которые остаются.');
+ await dialog.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Тестовая история',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Тестовая история',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Тестовая история'})).toBeVisible();
+ await page.locator('.detail-actions').getByRole('button',{name:'Редактировать',exact:true}).click();dialog=page.getByRole('dialog');
+ await dialog.getByLabel('Статус чтения').selectOption('finished');
+ await dialog.getByLabel('Дата завершения').fill('2026-01-10');await dialog.getByRole('button',{name:'Оценить на 4',exact:true}).click();
+ await dialog.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await expect(page.getByLabel('Оценка: 4 из 5')).toBeVisible();
+ await page.getByRole('button',{name:'Добавить цитату',exact:true}).click();dialog=page.getByRole('dialog');
+ await dialog.getByLabel('Текст цитаты').fill('Моя собственная тестовая строка.');await dialog.getByLabel('Страница', {exact:true}).fill('12');await dialog.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Цитаты',exact:true}).click();
+ await expect(page.getByText('Моя собственная тестовая строка.',{exact:true})).toBeVisible();
+ await page.getByLabel('Настройки', {exact:true}).click();await page.getByLabel('Количество книг').fill('10');await page.getByRole('button',{name:'Сохранить цель'}).click();
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Статистика'}).click();await page.getByLabel('Год',{exact:true}).selectOption('2026');
+ await expect(page.getByText('1 из 10 книг · 10% годовой цели')).toBeVisible();
+ await expect(page.locator('.metrics')).toContainText('200');
+ await page.reload();await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Цитаты',exact:true}).click();await expect(page.getByText('Моя собственная тестовая строка.',{exact:true})).toBeVisible();
+ await page.getByLabel('Настройки', {exact:true}).click();const event=page.waitForEvent('download');await page.getByRole('button',{name:'Скачать резервную копию',exact:true}).click();const dl=await event;const content=await readFile((await dl.path())!,'utf8');const backup=JSON.parse(content);expect(backup.version).toBe(1);expect(backup.books.length).toBe(5);expect(backup.quotes.length).toBe(1);expect(backup.exportedAt).toBeTruthy();
+ await page.getByLabel('JSON-файл резервной копии').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"books":[]}')});await expect(page.getByRole('alert')).toContainText('Неподдерживаемый');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('moya-biblioteka.v1')!).books.length)).toBe(5);
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();await page.getByLabel('Поиск книг').fill('Тестовая');await page.getByRole('button',{name:'Тестовая история',exact:true}).click();await page.getByLabel('Удалить книгу',{exact:true}).click();await expect(page.getByRole('dialog')).toContainText('связанные цитаты (1)');await page.getByRole('dialog').getByRole('button',{name:'Удалить',exact:true}).click();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('moya-biblioteka.v1')!).quotes.length)).toBe(0);
+ await page.getByLabel('Настройки',{exact:true}).click();await page.getByLabel('JSON-файл резервной копии').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(content)});await expect(page.getByRole('dialog')).toContainText('Найдено книг: 5');await page.getByRole('button',{name:'Восстановить',exact:true}).click();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('moya-biblioteka.v1')!).quotes[0].text)).toBe('Моя собственная тестовая строка.');expect(errors).toEqual([]);
+});
+test('iPhone: все разделы без горизонтального скролла, форма и пустая библиотека',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/');
+ await page.screenshot({path:'test-results/iphone-home.png',fullPage:true});
+ for(const label of ['Книги','Цитаты','Итоги','Главная']){await page.getByRole('navigation',{name:'Мобильная навигация'}).getByRole('button',{name:label,exact:true}).click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)}
+ await page.getByRole('navigation',{name:'Мобильная навигация'}).getByRole('button',{name:'Книги',exact:true}).click();await page.locator('.page-heading').getByRole('button',{name:'Добавить книгу',exact:true}).click();await expect(page.getByRole('dialog').getByRole('button',{name:'Сохранить',exact:true})).toBeVisible();await page.getByLabel('Название книги').fill('Мобильная книга');await page.getByLabel('Автор', {exact:false}).fill('Автор');await page.getByRole('dialog').getByRole('button',{name:'Сохранить',exact:true}).click();await expect(page.getByRole('button',{name:'Мобильная книга',exact:true})).toBeVisible();
+ await page.evaluate(()=>localStorage.setItem('moya-biblioteka.v1',JSON.stringify({version:1,books:[],quotes:[],settings:{goals:{}}})));await page.reload();await page.getByRole('navigation',{name:'Мобильная навигация'}).getByRole('button',{name:'Книги',exact:true}).click();await expect(page.getByText('Первая книга — начало коллекции')).toBeVisible();
+});
+test('Журнальная главная на компьютере и PWA-ресурсы',async({page,request})=>{await page.goto('/');await page.screenshot({path:'test-results/desktop-home.png',fullPage:true});for(const url of ['/manifest.webmanifest','/apple-touch-icon.png','/icon-192.png','/icon-512.png']){expect((await request.get(url)).ok()).toBe(true)}expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)});
+test('Прогресс, скрытые поля, фильтры и редактирование цитаты',async({page})=>{
+ await page.goto('/');await page.getByRole('button',{name:'Изменить прогресс'}).click();let d=page.getByRole('dialog');await d.getByLabel('Прочитанная страница').fill('220');await d.getByRole('button',{name:'Сохранить',exact:true}).click();await expect(page.getByText('220 из 640 страниц')).toBeVisible();
+ await page.getByRole('button',{name:'Открыть книгу',exact:true}).click();await page.locator('.detail-actions').getByRole('button',{name:'Редактировать',exact:true}).click();d=page.getByRole('dialog');await d.getByLabel('Личные впечатления').fill('Заметка сохранена');await d.getByLabel('Дата начала').fill('2026-02-01');await d.getByLabel('Статус чтения').selectOption('planned');await d.getByLabel('Статус чтения').selectOption('reading');await expect(d.getByLabel('Личные впечатления')).toHaveValue('Заметка сохранена');await expect(d.getByLabel('Дата начала')).toHaveValue('2026-02-01');await expect(d.getByLabel('Прочитанная страница')).toHaveValue('220');await d.getByLabel('Добавить в избранное').check();await d.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await page.getByRole('button',{name:'Добавить цитату',exact:true}).click();d=page.getByRole('dialog');await d.getByLabel('Текст цитаты').fill('Авторская заметка для проверки.');await d.getByRole('button',{name:'Сохранить',exact:true}).click();await page.getByLabel('Редактировать цитату',{exact:true}).click();d=page.getByRole('dialog');await d.getByLabel('Текст цитаты').fill('Изменённая авторская заметка.');await d.getByLabel('В избранное',{exact:true}).check();await d.getByRole('button',{name:'Сохранить',exact:true}).click();await expect(page.getByText('Изменённая авторская заметка.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'К коллекции',exact:true}).click();await page.getByRole('button',{name:'Избранное',exact:true}).click();await expect(page.locator('.book-card')).toHaveCount(1);await page.getByLabel('Поиск книг').fill('корелли');await expect(page.locator('.book-card')).toHaveCount(1);await page.getByLabel('Фильтр по жанру').selectOption('Детектив');await expect(page.getByText('Пока ничего не найдено')).toBeVisible();await page.getByRole('button',{name:'Сбросить фильтры'}).click();await expect(page.locator('.book-card')).toHaveCount(4);
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Цитаты',exact:true}).click();await page.getByRole('button',{name:'Избранное',exact:true}).click();await expect(page.locator('.quote-card')).toHaveCount(1);await page.getByLabel('Удалить цитату',{exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Удалить',exact:true}).click();await expect(page.locator('.quote-card')).toHaveCount(0);
+});
+test('Повреждённое хранилище не перезаписывается без восстановления',async({page})=>{
+ await page.goto('/');await page.evaluate(()=>localStorage.setItem('moya-biblioteka.v1','{broken'));await page.reload();await expect(page.getByRole('alert')).toContainText('Исходные данные сохранены');await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();await page.locator('.page-heading').getByRole('button',{name:'Добавить книгу',exact:true}).click();const d=page.getByRole('dialog');await d.getByLabel('Название книги').fill('Новая');await d.getByLabel('Автор',{exact:false}).fill('Автор');await d.getByRole('button',{name:'Сохранить',exact:true}).click();expect(await page.evaluate(()=>localStorage.getItem('moya-biblioteka.v1'))).toBe('{broken');await expect(d).toBeVisible();
+});
