@@ -53,3 +53,25 @@ test('Прогресс, скрытые поля, фильтры и редакт�
 test('Повреждённое хранилище не перезаписывается без восстановления',async({page})=>{
  await page.goto('./');await page.evaluate(()=>localStorage.setItem('moya-biblioteka.v1','{broken'));await page.reload();await expect(page.getByRole('alert')).toContainText('Исходные данные сохранены');await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();await page.locator('.page-heading').getByRole('button',{name:'Добавить книгу',exact:true}).click();const d=page.getByRole('dialog');await d.getByLabel('Название книги').fill('Новая');await d.getByLabel('Автор',{exact:false}).fill('Автор');await d.getByRole('button',{name:'Сохранить',exact:true}).click();expect(await page.evaluate(()=>localStorage.getItem('moya-biblioteka.v1'))).toBe('{broken');await expect(d).toBeVisible();
 });
+test('Мобильная форма: дата и страница не пересекаются',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('./');
+ await page.getByRole('button',{name:'Открыть книгу',exact:true}).click();
+ await page.locator('.detail-actions').getByRole('button',{name:'Редактировать',exact:true}).click();
+ const dialog=page.getByRole('dialog');const date=dialog.getByLabel('Дата начала');const current=dialog.getByLabel('Прочитанная страница');
+ await date.scrollIntoViewIfNeeded();const a=await date.boundingBox();const b=await current.boundingBox();
+ expect(a).not.toBeNull();expect(b).not.toBeNull();expect(b!.y).toBeGreaterThanOrEqual(a!.y+a!.height);expect(Math.abs(a!.x-b!.x)).toBeLessThan(1);expect(Math.abs(a!.width-b!.width)).toBeLessThan(1);expect(Math.abs(a!.height-b!.height)).toBeLessThan(1);
+ const overflow=await dialog.evaluate(el=>el.scrollWidth>el.clientWidth);expect(overflow).toBe(false);
+ await current.fill('201');await dialog.getByRole('button',{name:'Сохранить',exact:true}).click();await expect(page.getByText('201 страниц',{exact:true})).toBeVisible();
+});
+test('Обложка остаётся читаемой при медленной сети и прозрачном пикселе',async({page})=>{
+ const pending=[] as import('@playwright/test').Route[];
+ await page.route('https://covers.openlibrary.org/**',route=>{pending.push(route)});
+ await page.goto('./',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('.featured-cover .cover-type')).toBeVisible();
+ await expect(page.locator('.featured-cover .cover-type strong')).toHaveText('Скорбь сатаны');
+ await expect.poll(()=>pending.length).toBeGreaterThan(0);
+ for(const route of pending)await route.fulfill({contentType:'image/gif',body:Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7','base64')});
+ await expect(page.locator('.featured-cover img')).toHaveCount(0);await expect(page.locator('.featured-cover .cover-type')).toBeVisible();
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Цитаты',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Добавить цитату',exact:true})).toHaveCount(1);await expect(page.getByRole('button',{name:'Сохранить цитату',exact:true})).toHaveCount(0);
+});
