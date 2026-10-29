@@ -1,10 +1,11 @@
+import {KEY,persistLibrary,revisionOf} from './storage';
+export {KEY} from './storage';
 import {SEASONS,validISBN,type Season,type Shelf} from './collections';
 export const STATUSES = { planned: 'Хочу прочитать', reading: 'Читаю', finished: 'Прочитано' } as const;
 export type Status = keyof typeof STATUSES;
 export interface Book {id:string; title:string; author:string; genre:string; pages:number|null; currentPage:number; cover:string; status:Status; startDate:string; endDate:string; rating:number|null; notes:string; favorite:boolean; createdAt:string; seasons:Season[]; tags:string[]; shelfIds:string[]; isbn:string; publisher:string; publicationDate:string}
 export interface Quote {id:string; bookId:string; text:string; page:number|null; favorite:boolean; createdAt:string}
 export interface Library {version:1; books:Book[]; quotes:Quote[]; shelves:Shelf[]; settings:{goals:Record<string,number>}}
-export const KEY='moya-biblioteka.v1';
 export const GENRES=['Роман','Классика','Детектив','Фантастика','Фэнтези','Поэзия','Нон-фикшн','Биография'];
 export const yearNow=()=>new Date().getFullYear();
 export const today=()=>{const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -44,8 +45,8 @@ export function parseLibrary(value:unknown):Library {
  // Rebuild only known schema fields; do not retain arbitrary imported properties.
  return {version:1,books:value.books.map((b:Book)=>({id:b.id,title:b.title,author:b.author,genre:b.genre,pages:b.pages,currentPage:b.currentPage,cover:b.cover,status:b.status,startDate:b.startDate,endDate:b.endDate,rating:b.rating,notes:b.notes,favorite:b.favorite,createdAt:b.createdAt,seasons:b.seasons??[],tags:b.tags??[],shelfIds:b.shelfIds??[],isbn:b.isbn??'',publisher:b.publisher??'',publicationDate:b.publicationDate??''})),shelves,quotes:value.quotes.map((q:Quote)=>({id:q.id,bookId:q.bookId,text:q.text,page:q.page,favorite:q.favorite,createdAt:q.createdAt})),settings:{goals:{...value.settings.goals} as Record<string,number>}};
 }
-export function readLibrary():{data:Library;error:string} {try{const raw=localStorage.getItem(KEY);return {data:raw===null?seed():parseLibrary(JSON.parse(raw)),error:''}}catch{return {data:{version:1,books:[],quotes:[],shelves:[],settings:{goals:{}}},error:'Не удалось прочитать библиотеку. Исходные данные сохранены без изменений. Скачайте их в настройках, прежде чем восстановить резервную копию.'}}}
-export function saveLibrary(data:Library){localStorage.setItem(KEY,JSON.stringify(data))}
+export function readLibrary():{data:Library;error:string;revision:string|null} {try{const raw=localStorage.getItem(KEY);return {data:raw===null?seed():parseLibrary(JSON.parse(raw)),error:'',revision:revisionOf(raw)}}catch{return {data:{version:1,books:[],quotes:[],shelves:[],settings:{goals:{}}},error:'Не удалось прочитать библиотеку. Исходные данные сохранены без изменений. Скачайте их в настройках, прежде чем восстановить резервную копию.',revision:null}}}
+export function saveLibrary(data:Library,expectedRevision?:string|null){return persistLibrary(data,expectedRevision)}
 export function stats(data:Library,year:number){const finished=data.books.filter(b=>b.status==='finished'&&b.endDate&&Number(b.endDate.slice(0,4))===year);const rated=finished.filter(b=>b.rating!==null);const months=Array.from({length:12},(_,i)=>finished.filter(b=>Number(b.endDate.slice(5,7))===i+1).length);const genres:Record<string,number>={};finished.forEach(b=>{const g=b.genre||'Без жанра';genres[g]=(genres[g]||0)+1});const goal=data.settings.goals[year]||0;return {finished,months,genres,pages:finished.reduce((n,b)=>n+(b.pages||0),0),average:rated.length?rated.reduce((n,b)=>n+b.rating!,0)/rated.length:null,goal,progress:goal?finished.length/goal*100:0}}
 export function exportData(data:Library){download(JSON.stringify({...data,exportedAt:new Date().toISOString()},null,2),`моя-библиотека-${today()}.json`)}
 export function download(text:string,name:string){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}

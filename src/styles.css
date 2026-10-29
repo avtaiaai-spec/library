@@ -48,3 +48,12 @@
 
 .filters-toggle{display:none}
 @media(max-width:760px){.filters-toggle{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px;width:100%;text-align:left;color:var(--burgundy);padding:0}.filters-toggle span{margin-left:auto}.filters .filter-selects{display:none}.filters.is-open .filter-selects{display:grid}}
+/* Seasons live inside the collection filters on every screen size. */
+.filters-toggle{display:flex;align-items:center;gap:10px;min-height:44px;color:var(--burgundy);font-size:13px}
+.filters-toggle span{margin-left:12px}.collection-filter-panel{width:100%}.collection-filter-panel[hidden]{display:none}
+.collection-filter-panel .season-filters{padding:0 0 15px}.collection-filter-panel .filter-selects{display:flex;margin:0;flex-wrap:wrap}
+.diary-controls{display:flex;align-items:center;gap:20px}.diary-controls select{font-size:12px;min-height:44px;padding:8px 12px;background:transparent;border-color:var(--line)}.diary-source{flex-wrap:wrap}
+.storage-panel a{color:var(--burgundy);overflow-wrap:anywhere}.storage-panel>p{font-size:14px}.storage-panel>.button{margin:0 8px 12px 0}.local-copies>div{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);padding:12px 0;font-size:13px}.local-copies small{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.update-banner{max-width:1152px;margin:20px auto 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--ivory);border:1px solid var(--line);font-size:13px;line-height:1.7}.update-banner .button{white-space:nowrap;font-size:12px}
+@media(max-width:760px){.diary-section>.section-header{flex-wrap:wrap}.diary-controls{justify-content:space-between;width:100%;gap:12px}.diary-controls select{font-size:13px}.collection-filter-panel .filter-selects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.collection-filter-panel .season-filters{padding:0 0 12px}.storage-panel>.button{width:100%;margin:0 0 12px}.local-copies>div{font-size:12px}.update-banner{margin:15px 22px 0;flex-wrap:wrap;gap:10px}.update-banner .button{width:100%}.quote-toolbar select{max-width:100%;min-width:0;flex:1 1 130px}}
+.update-banner small{display:block;font-size:11px;color:var(--muted);margin-top:4px}
