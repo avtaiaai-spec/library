@@ -3,189 +3,162 @@
     "id": "recommendation-0",
     "title": "Портрет Дориана Грея",
     "author": "Оскар Уайльд",
-    "englishTitle": "The Picture of Dorian Gray",
     "englishAuthor": "Oscar Wilde"
   },
   {
     "id": "recommendation-1",
     "title": "Фауст",
     "author": "Иоганн Вольфганг Гёте",
-    "englishTitle": "Faust",
     "englishAuthor": "Johann Wolfgang von Goethe"
   },
   {
     "id": "recommendation-2",
     "title": "Мастер и Маргарита",
     "author": "Михаил Булгаков",
-    "englishTitle": "The Master and Margarita",
     "englishAuthor": "Mikhail Bulgakov"
   },
   {
     "id": "recommendation-3",
     "title": "Джейн Эйр",
     "author": "Шарлотта Бронте",
-    "englishTitle": "Jane Eyre",
     "englishAuthor": "Charlotte Brontë"
   },
   {
     "id": "recommendation-4",
     "title": "Городок",
     "author": "Шарлотта Бронте",
-    "englishTitle": "Villette",
     "englishAuthor": "Charlotte Brontë"
   },
   {
     "id": "recommendation-5",
     "title": "Грозовой перевал",
     "author": "Эмили Бронте",
-    "englishTitle": "Wuthering Heights",
     "englishAuthor": "Emily Brontë"
   },
   {
     "id": "recommendation-6",
     "title": "Гордость и предубеждение",
     "author": "Джейн Остин",
-    "englishTitle": "Pride and Prejudice",
     "englishAuthor": "Jane Austen"
   },
   {
     "id": "recommendation-7",
     "title": "Очарованный апрель",
     "author": "Элизабет фон Арним",
-    "englishTitle": "The Enchanted April",
     "englishAuthor": "Elizabeth von Arnim"
   },
   {
     "id": "recommendation-8",
     "title": "Скорбь сатаны",
     "author": "Мария Корелли",
-    "englishTitle": "The Sorrows of Satan",
     "englishAuthor": "Marie Corelli"
   },
   {
     "id": "recommendation-9",
     "title": "Роман двух миров",
     "author": "Мария Корелли",
-    "englishTitle": "A Romance of Two Worlds",
     "englishAuthor": "Marie Corelli"
   },
   {
     "id": "recommendation-10",
     "title": "Имя розы",
     "author": "Умберто Эко",
-    "englishTitle": "The Name of the Rose",
     "englishAuthor": "Umberto Eco"
   },
   {
     "id": "recommendation-11",
     "title": "Маятник Фуко",
     "author": "Умберто Эко",
-    "englishTitle": "Foucault’s Pendulum",
     "englishAuthor": "Umberto Eco"
   },
   {
     "id": "recommendation-12",
     "title": "Убийство в Восточном экспрессе",
     "author": "Агата Кристи",
-    "englishTitle": "Murder on the Orient Express",
     "englishAuthor": "Agatha Christie"
   },
   {
     "id": "recommendation-13",
     "title": "Собака Баскервилей",
     "author": "Артур Конан Дойл",
-    "englishTitle": "The Hound of the Baskervilles",
     "englishAuthor": "Arthur Conan Doyle"
   },
   {
     "id": "recommendation-14",
     "title": "Солярис",
     "author": "Станислав Лем",
-    "englishTitle": "Solaris",
     "englishAuthor": "Stanisław Lem"
   },
   {
     "id": "recommendation-15",
     "title": "Пикник на обочине",
     "author": "Аркадий и Борис Стругацкие",
-    "englishTitle": "Roadside Picnic",
     "englishAuthor": "Strugatsky"
   },
   {
     "id": "recommendation-16",
     "title": "451 градус по Фаренгейту",
     "author": "Рэй Брэдбери",
-    "englishTitle": "Fahrenheit 451",
     "englishAuthor": "Ray Bradbury"
   },
   {
     "id": "recommendation-17",
     "title": "Хоббит, или Туда и обратно",
     "author": "Джон Рональд Руэл Толкин",
-    "englishTitle": "The Hobbit",
     "englishAuthor": "J. R. R. Tolkien"
   },
   {
     "id": "recommendation-18",
     "title": "Волшебник Земноморья",
     "author": "Урсула Ле Гуин",
-    "englishTitle": "A Wizard of Earthsea",
     "englishAuthor": "Ursula K. Le Guin"
   },
   {
     "id": "recommendation-19",
     "title": "Последнее желание",
     "author": "Анджей Сапковский",
-    "englishTitle": "The Last Wish",
     "englishAuthor": "Andrzej Sapkowski"
   },
   {
     "id": "recommendation-20",
     "title": "Реквием",
     "author": "Анна Ахматова",
-    "englishTitle": "Requiem",
     "englishAuthor": "Anna Akhmatova"
   },
   {
     "id": "recommendation-21",
     "title": "Камень",
     "author": "Осип Мандельштам",
-    "englishTitle": "Stone",
     "englishAuthor": "Osip Mandelstam"
   },
   {
     "id": "recommendation-22",
     "title": "Думай медленно… решай быстро",
     "author": "Даниэль Канеман",
-    "englishTitle": "Thinking, Fast and Slow",
     "englishAuthor": "Daniel Kahneman"
   },
   {
     "id": "recommendation-23",
     "title": "Краткая история времени",
     "author": "Стивен Хокинг",
-    "englishTitle": "A Brief History of Time",
     "englishAuthor": "Stephen Hawking"
   },
   {
     "id": "recommendation-24",
     "title": "Сказать жизни «Да!»",
     "author": "Виктор Франкл",
-    "englishTitle": "Man’s Search for Meaning",
     "englishAuthor": "Viktor E. Frankl"
   },
   {
     "id": "recommendation-25",
     "title": "Долгий путь к свободе",
     "author": "Нельсон Мандела",
-    "englishTitle": "Long Walk to Freedom",
     "englishAuthor": "Nelson Mandela"
   },
   {
     "id": "recommendation-26",
     "title": "Былое и думы",
     "author": "Александр Герцен",
-    "englishTitle": "My Past and Thoughts",
     "englishAuthor": "Alexander Herzen"
   }
 ]

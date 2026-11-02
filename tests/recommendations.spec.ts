@@ -30,7 +30,7 @@ test('Рекомендации: подтверждение, сохранение
 test('Настоящая обложка из каталога показывается и переносится при добавлении книги',async({page})=>{
  await page.route('https://openlibrary.org/search.json?**',async route=>{
   const title=new URL(route.request().url()).searchParams.get('title');
-  await route.fulfill({json:{docs:title==='Маятник Фуко'?[{title:'Маятник Фуко',author_name:['Умберто Эко'],cover_i:123456}]:[]}});
+  await route.fulfill({json:{docs:title==='Маятник Фуко'?[{title:'Маятник Фуко',author_name:['Умберто Эко'],editions:{docs:[{key:'/books/OL123M',title:'Маятник Фуко',language:['rus'],cover_i:123456}]}}]:[]}});
  });
  // The image response is controlled; live catalogue availability is tested separately.
  await page.route('https://covers.openlibrary.org/b/id/123456-L.jpg?**',route=>route.fulfill({path:'public/icon-192.png',contentType:'image/png'}));
