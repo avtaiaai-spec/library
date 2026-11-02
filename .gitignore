@@ -5,3 +5,5 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 src/assets/covers/*.jpg
+
+src/assets/recommendation-covers/*.jpg

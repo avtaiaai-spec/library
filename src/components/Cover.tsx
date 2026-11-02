@@ -1,6 +1,7 @@
 import {useState,type CSSProperties} from 'react';
 import {BookOpen} from 'lucide-react';
 import type {Book} from '../data';
+import {bundledRecommendationCover} from '../recommendation-covers';
 type CoverBook=Pick<Book,'title'|'author'|'cover'>;
 
 // Available covers are included in the build, so phones load them from the site itself.
@@ -9,6 +10,7 @@ const bundledCovers=import.meta.glob<string>('../assets/covers/*.jpg',{
 });
 function sourcesFor(cover:string):string[]{
   if(!cover)return [];
+  if(cover.startsWith('/')&&!cover.startsWith('//'))return [cover];
   try{
     const url=new URL(cover);
     if(url.hostname==='covers.openlibrary.org'){
@@ -22,7 +24,8 @@ function sourcesFor(cover:string):string[]{
 }
 export function Cover({book,large=false}:{book:CoverBook;large?:boolean}){
   // A changed URL remounts the image state immediately, including during book editing.
-  return <CoverImage key={book.cover} book={book} large={large}/>;
+  const cover=book.cover||bundledRecommendationCover(book);
+  return <CoverImage key={cover} book={{...book,cover}} large={large}/>;
 }
 function CoverImage({book,large}:{book:CoverBook;large:boolean}){
   const sources=sourcesFor(book.cover);
