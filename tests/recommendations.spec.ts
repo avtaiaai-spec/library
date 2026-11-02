@@ -1,0 +1,28 @@
+import {test,expect} from '@playwright/test';
+test('Рекомендации: подтверждение, сохранение, исключение добавленной книги и мобильная вёрстка',async({page})=>{
+ await page.goto('./');
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();
+ await page.getByRole('button',{name:'Открыть книгу Имя розы',exact:true}).click();
+ const section=page.getByRole('region',{name:'Возможно, вам будет интересно'});
+ await expect(section).toBeVisible();
+ const first=section.locator('article').first();
+ await expect(first.getByRole('heading',{name:'Маятник Фуко'})).toBeVisible();
+ await expect(first).toContainText('Ещё одна книга этого автора');
+ await first.getByRole('button',{name:'Хочу прочитать'}).click();
+ const dialog=page.getByRole('dialog');
+ await expect(dialog).toHaveAccessibleName('Новая история');
+ await expect(dialog.getByLabel('Название книги')).toHaveValue('Маятник Фуко');
+ await dialog.getByRole('button',{name:'Отмена',exact:true}).click();
+ await expect(first).toBeVisible();
+ await first.getByRole('button',{name:'Хочу прочитать'}).click();
+ await dialog.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await expect(section.getByRole('heading',{name:'Маятник Фуко'})).toHaveCount(0);
+ await page.reload();
+ await page.getByRole('navigation',{name:'Основная навигация',exact:true}).getByRole('button',{name:'Мои книги'}).click();
+ await page.getByRole('button',{name:'Открыть книгу Маятник Фуко',exact:true}).click();
+ await expect(page.getByRole('heading',{level:1,name:'Маятник Фуко'})).toBeVisible();
+ await expect(page.locator('.detail-status')).toContainText('Хочу прочитать');
+ await page.setViewportSize({width:320,height:740});
+ await expect(section).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
