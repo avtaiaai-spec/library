@@ -7,3 +7,7 @@ test-results/
 src/assets/covers/*.jpg
 
 src/assets/recommendation-covers/*.jpg
+
+.env
+.env.*
+!.env.example
