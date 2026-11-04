@@ -1,3 +1,4 @@
+import {parseProfile,type ReaderProfile} from './profile';
 import {KEY,persistLibrary,revisionOf} from './storage';
 export {KEY} from './storage';
 import {SEASONS,validISBN,type Season,type Shelf} from './collections';
@@ -5,7 +6,7 @@ export const STATUSES = { planned: 'Хочу прочитать', reading: 'Чи
 export type Status = keyof typeof STATUSES;
 export interface Book {id:string; title:string; author:string; genre:string; pages:number|null; currentPage:number; cover:string; status:Status; startDate:string; endDate:string; rating:number|null; notes:string; favorite:boolean; createdAt:string; seasons:Season[]; tags:string[]; shelfIds:string[]; isbn:string; publisher:string; publicationDate:string}
 export interface Quote {id:string; bookId:string; text:string; page:number|null; favorite:boolean; createdAt:string}
-export interface Library {version:1; books:Book[]; quotes:Quote[]; shelves:Shelf[]; settings:{goals:Record<string,number>}}
+export interface Library {version:1; profile?:ReaderProfile; books:Book[]; quotes:Quote[]; shelves:Shelf[]; settings:{goals:Record<string,number>}}
 export const GENRES=['Роман','Классика','Детектив','Фантастика','Фэнтези','Поэзия','Нон-фикшн','Биография'];
 export const yearNow=()=>new Date().getFullYear();
 export const today=()=>{const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -42,8 +43,9 @@ export function parseLibrary(value:unknown):Library {
  }
  const qids=new Set<string>();for(const q of value.quotes){if(!isObj(q)||!str(q.id)||!q.id||qids.has(q.id as string)||!ids.has(q.bookId as string)||!str(q.text)||!q.text.trim()||typeof q.favorite!=='boolean'||!str(q.createdAt)||Number.isNaN(Date.parse(q.createdAt as string))||(q.page!==null&&(!integer(q.page)||(q.page as number)<1)))throw new Error('Некорректная цитата или потерянная связь с книгой.');qids.add(q.id as string)}
  for(const [y,g] of Object.entries(value.settings.goals)){if(!/^\d{4}$/.test(y)||!integer(g)||Number(g)>10000)throw new Error('Некорректная годовая цель.');}
+ const profile=value.profile===undefined?undefined:parseProfile(value.profile);
  // Rebuild only known schema fields; do not retain arbitrary imported properties.
- return {version:1,books:value.books.map((b:Book)=>({id:b.id,title:b.title,author:b.author,genre:b.genre,pages:b.pages,currentPage:b.currentPage,cover:b.cover,status:b.status,startDate:b.startDate,endDate:b.endDate,rating:b.rating,notes:b.notes,favorite:b.favorite,createdAt:b.createdAt,seasons:b.seasons??[],tags:b.tags??[],shelfIds:b.shelfIds??[],isbn:b.isbn??'',publisher:b.publisher??'',publicationDate:b.publicationDate??''})),shelves,quotes:value.quotes.map((q:Quote)=>({id:q.id,bookId:q.bookId,text:q.text,page:q.page,favorite:q.favorite,createdAt:q.createdAt})),settings:{goals:{...value.settings.goals} as Record<string,number>}};
+ return {version:1,...(profile?{profile}:{}),books:value.books.map((b:Book)=>({id:b.id,title:b.title,author:b.author,genre:b.genre,pages:b.pages,currentPage:b.currentPage,cover:b.cover,status:b.status,startDate:b.startDate,endDate:b.endDate,rating:b.rating,notes:b.notes,favorite:b.favorite,createdAt:b.createdAt,seasons:b.seasons??[],tags:b.tags??[],shelfIds:b.shelfIds??[],isbn:b.isbn??'',publisher:b.publisher??'',publicationDate:b.publicationDate??''})),shelves,quotes:value.quotes.map((q:Quote)=>({id:q.id,bookId:q.bookId,text:q.text,page:q.page,favorite:q.favorite,createdAt:q.createdAt})),settings:{goals:{...value.settings.goals} as Record<string,number>}};
 }
 export function readLibrary():{data:Library;error:string;revision:string|null} {try{const raw=localStorage.getItem(KEY);return {data:raw===null?seed():parseLibrary(JSON.parse(raw)),error:'',revision:revisionOf(raw)}}catch{return {data:{version:1,books:[],quotes:[],shelves:[],settings:{goals:{}}},error:'Не удалось прочитать библиотеку. Исходные данные сохранены без изменений. Скачайте их в настройках, прежде чем восстановить резервную копию.',revision:null}}}
 export function saveLibrary(data:Library,expectedRevision?:string|null){return persistLibrary(data,expectedRevision)}
